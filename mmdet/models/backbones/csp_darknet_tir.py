@@ -459,8 +459,8 @@ class CSPDarknet_TIR(BaseModule):
                  norm_cfg=dict(type='BN', momentum=0.03, eps=0.001),
                  act_cfg=dict(type='Swish'),
                  norm_eval=False,
-                 pearlgan_ckpt='configs/yolox_tir/pearlgan_ckpt/FLIR_NTIR2DC/', ### added
-                 pearlgan_half=True,  # 是否将pearlgan的权重精度由fp32降到fp16. 实践发现1080Ti上没什么用，2080Ti上提速明显
+                 pearlgan_ckpt='configs/tirdet/pearlgan_ckpt/FLIR_NTIR2DC/',
+                 pearlgan_half=True,
                  freeze_pearlgan=True,
                  init_cfg=dict(
                      type='Kaiming',
@@ -490,13 +490,12 @@ class CSPDarknet_TIR(BaseModule):
         self.pearlgan = PEARLGAN(ckpt_path=pearlgan_ckpt) ### added
         if pearlgan_half:
             self.pearlgan = self.pearlgan.half()
-        if freeze_pearlgan:   # 如果不冻住pearlgan, 显存吃不消
+        if freeze_pearlgan:
             for p in self.pearlgan.parameters():
                 p.requires_grad = False
 
         self.stem = Focus(
-            # 3,
-            in_channels=6,  # in_channels改成6
+            in_channels=6,
             out_channels=int(arch_setting[0][0] * widen_factor),
             kernel_size=3,
             conv_cfg=conv_cfg,
@@ -559,28 +558,16 @@ class CSPDarknet_TIR(BaseModule):
                     m.eval()
 
     def forward(self, x):
-        # #######################visualization#######################
-        # import cv2
-        # os.makedirs('_work_dir/yolox_tir_m_8x8_300e_coco/visualization', exist_ok=True) # 20230423为了visualization添加
-        # x = x[:, :, :512, :]
-        # print(x.shape)
-        # # torch.save('_work_dir/yolox_tir_m_8x8_300e_coco/visualization/img.pth', x)
-        # img = x[0].permute(1, 2, 0).detach().cpu().numpy()
-        # print(img.shape)
-        # cv2.imwrite('_work_dir/yolox_tir_m_8x8_300e_coco/visualization/img.jpg', img)
-        # # exit()
-        # #######################visualization#######################
         outs = []
         if self.pearlgan_half:
-            z, translated_vis = self.pearlgan(x.half()) ### 将feature转成fp16，输入pearlgan(已转成fp16).
-            z, translated_vis = z.float(), translated_vis.float() # 再将feature转回fp32，输入yolox的cspdarknet
+            z, translated_vis = self.pearlgan(x.half())
+            z, translated_vis = z.float(), translated_vis.float()
         else:
-            z, translated_vis = self.pearlgan(x) # 直接用fp32的feature输入到fp32的pearlgan中
-        x = torch.cat((x, translated_vis), dim=1) ### added
+            z, translated_vis = self.pearlgan(x) 
+        x = torch.cat((x, translated_vis), dim=1) 
         for i, layer_name in enumerate(self.layers):
             layer = getattr(self, layer_name)
             x = layer(x)
             if i in self.out_indices:
                 outs.append(x)
-        # return tuple(outs)
-        return (z, outs) # 把pearlgan中间的z (encoded feature)也作为输出
+        return (z, outs)
