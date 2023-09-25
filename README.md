@@ -3,9 +3,9 @@ Source Code for '**TIRDet: Mono-Modality Thermal InfraRed Object Detection Based
 
 Accepted by **ACM MM'23**
 
-![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/d144a315-e9c1-43a8-8aeb-90bcafe18208)
+![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/78f6c706-8b9b-4be2-909b-87b778d7a074)
 
-![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/ef2965be-f926-430a-bd54-21392398eb2b)
+![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/8ff7acff-10ad-4e64-b7d4-303ef13c8aef)
 
 
 This repo highly inherits the **mmdetection** framework.
@@ -32,4 +32,5 @@ Cross-modality images that combine visible-infrared spectra can provide compleme
 
 # Experiments
 
-![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/d357fe67-506e-43d6-a4f7-ca955087e3a9)
+![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/02a03c1b-e473-49e5-97b1-3dd2d312bc8f)
+
