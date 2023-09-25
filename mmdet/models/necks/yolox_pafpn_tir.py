@@ -11,7 +11,6 @@ from ..builder import NECKS
 from ..utils import CSPLayer
 
 
-# 通道注意力机制
 class ChannelAttention(nn.Module):
     def __init__(self, in_planes, ratio=4):
         super(ChannelAttention, self).__init__()
@@ -31,7 +30,6 @@ class ChannelAttention(nn.Module):
         return self.sigmoid(out)
 
 
-# 空间注意力机制
 class SpatialAttention(nn.Module):
     def __init__(self, kernel_size=7):
         super(SpatialAttention, self).__init__()
@@ -58,10 +56,6 @@ class IMA(nn.Module):
         self.spatialattention = SpatialAttention(kernel_size=7)
 
     def forward(self, z, f):
-        """
-        z: pearlgan的encoded feature. 形状为(B, 256, H/4, W/4)
-        f: necks内部的feature map. 形状为(B, f_channels, h, w)
-        """
         # nn.AdaptiveAvgPool2d(1)
         z = F.adaptive_avg_pool2d(z, f.shape[-2:])  # (B, 256, h, w)
         F_cross = self.conv1x1_z(z) * f                   # (B, f_channels, h, w)
@@ -69,8 +63,7 @@ class IMA(nn.Module):
         spatial_branch = self.spatialattention(F_cross) # (B, 1, h, w)
         out = f * channel_branch * spatial_branch + f
 
-        # return out # 20230423为了visualization注释掉
-        return out, self.conv1x1_z(z), F_cross  # 20230423为了visualization添加
+        return out, self.conv1x1_z(z)
 
 
 
@@ -198,32 +191,11 @@ class YOLOXPAFPN_TIR(BaseModule):
         Returns:
             tuple[Tensor]: YOLOXPAFPN features.
         """
-        F_in_list = [] # 20230423为了visualization添加, z对应文章里z_cross
-        F_out_list = [] # 20230423为了visualization添加, z对应文章里z_cross
-        z_cross_list = []  # 20230423为了visualization添加, z对应文章里z_cross
-        z_t2v_list = []  # 20230423为了visualization添加, z对应文章里z_cross
 
         z, inputs = inputs  # added z(z_t2v): (B, 256, H/4, W/4)
-        # print(z.shape)
         assert len(inputs) == len(self.in_channels)
 
         # top-down path
-
-        ##################### added #####################
-        for i in range(len(self.in_channels)):
-            # inputs[i] = self.ima_bottom_up[i](z, inputs[i])  # 20230423为了visualization注释掉
-            
-            # print(f'F_in: {inputs[i]}')
-            F_in_list.append(inputs[i])  # 20230423为了visualization添加, z对应文章里z_cross
-            inputs[i], z_t2v, F_cross = self.ima_bottom_up[i](z, inputs[i])  # 20230423为了visualization添加, z对应文章里z_cross
-            z_cross_list.append(F_cross)    # 20230423为了visualization添加, z对应文章里z_cross
-            z_t2v_list.append(z_t2v)    # 20230423为了visualization添加, z对应文章里z_cross
-            F_out_list.append(inputs[i])  # 20230423为了visualization添加, z对应文章里z_cross
-            # print(f'F_out: {inputs[i]}')
-
-        inputs = tuple(inputs)
-        
-        ##################### added #####################
 
         inner_outs = [inputs[-1]]
         for idx in range(len(self.in_channels) - 1, 0, -1):
@@ -239,22 +211,6 @@ class YOLOXPAFPN_TIR(BaseModule):
                 torch.cat([upsample_feat, feat_low], 1))
             inner_outs.insert(0, inner_out)
 
-        # ##################### added #####################
-        # inner_outs[0]: (B, in_channels[0], H/8, W/8)
-        # inner_outs[1]: (B, in_channels[0], H/4, W/4)
-        # inner_outs[2]: (B, in_channels[1], H/2, W/2)
-        for i in range(len(self.in_channels)):
-            # inner_outs[i] = self.ima_top_down[i](z, inner_outs[i])  # 20230423为了visualization注释掉
-
-            inner_outs[i], z_t2v, F_cross = self.ima_top_down[i](z, inner_outs[i])  # 20230423为了visualization添加, z对应文章里z_cross
-            # z_cross_list.append(z_cross)    # 20230423为了visualization添加, z对应文章里z_cross
-
-        # print(inner_outs[0].shape)
-        # print(inner_outs[1].shape)
-        # print(inner_outs[2].shape)
-        # exit()
-        # ##################### added #####################
-
         # bottom-up path
         outs = [inner_outs[0]]
         for idx in range(len(self.in_channels) - 1):
@@ -268,64 +224,6 @@ class YOLOXPAFPN_TIR(BaseModule):
         # out convs
         for idx, conv in enumerate(self.out_convs):
             outs[idx] = conv(outs[idx])
-
-        # import cv2
-        # import numpy as np
-        # z = F.avg_pool2d(z, kernel_size=5, stride=1, padding=2)
-        # z_vis = torch.mean(z[0], dim=0).detach().cpu().numpy()*255
-        # z_vis = cv2.applyColorMap(z_vis.astype(np.uint8), cv2.COLORMAP_JET)
-        # cv2.imwrite(f'_work_dir/yolox_tir_m_8x8_300e_coco/visualization/z_vis.jpg', z_vis)
-        # for i, z_cross in enumerate(z_cross_list):
-        #     print(z_cross.shape, torch.min(z_cross), torch.max(z_cross))
-        #     z_cross = F.avg_pool2d(z_cross, kernel_size=5, stride=1, padding=2)
-        #     z_cross_vis = torch.mean(z_cross[0], dim=0).detach().cpu().numpy()
-        #     print(np.max(z_cross_vis), np.min(z_cross_vis))
-        #     z_cross_vis = (z_cross_vis - np.min(z_cross_vis)) / (np.max(z_cross_vis) - np.min(z_cross_vis))*255
-        #     z_cross_vis = cv2.applyColorMap(z_cross_vis.astype(np.uint8), cv2.COLORMAP_JET)
-        #     cv2.imwrite(f'_work_dir/yolox_tir_m_8x8_300e_coco/visualization/z_{i}.jpg', z_cross_vis)
-        #     # print(z_cross.shape)
-        # # exit()
-        # input("继续：")
-        # import os
-        # for i in range(200):
-        #     save_dir = f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{i}'
-        #     if os.exists(save_dir):
-
-        # os.makedirs('./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/CMA1', exist_ok=True)
-        # os.makedirs('./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/CMA2', exist_ok=True)
-        # os.makedirs('./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/CMA3', exist_ok=True)
-        # os.makedirs('./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/CMA4', exist_ok=True)
-        # os.makedirs('./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/CMA5', exist_ok=True)
-        # os.makedirs('./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/CMA6', exist_ok=True)
-        
-        # for j in range(1000):
-        #     if os.path.exists(f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}'):
-        #         continue
-        #     else:
-        #         print(f'第{j}张图')
-        #         for i, z_cross in enumerate(z_cross_list):
-        #             print(i, z_cross.shape, torch.min(z_cross), torch.max(z_cross))
-        #             print(i, F_in_list[i].shape)
-        #             print(i, F_out_list[i].shape)
-        #             print(i, z_t2v_list[i].shape)
-
-        #             # for j in range(1000):
-        #             #     if os.path.exists(f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}'):
-        #             #         continue
-        #             #     else:
-        #             #         print(f'j: {j}')
-        #             os.makedirs(f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}/CMA{i+1}', exist_ok=True)
-        #             torch.save(z_cross.cpu(), f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}/CMA{i+1}/F_cross.pth')
-        #             torch.save(F_in_list[i].cpu(), f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}/CMA{i+1}/F_in.pth')
-        #             torch.save(F_out_list[i].cpu(), f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}/CMA{i+1}/F_out.pth')
-        #             torch.save(z_t2v_list[i].cpu(), f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}/CMA{i+1}/z_t2v.pth')
-        #             # torch.save(F.adaptive_avg_pool2d(z.cpu(), output_size=(8, 8)), f'./_work_dir/yolox_tir_m_8x8_300e_coco/CMA-TSNE/{j}/CMA{i+1}/z_t2v.pth')
-                
-        #         break
-        
-
-        # # input("继续：")
-
 
 
         return tuple(outs)
