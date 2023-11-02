@@ -34,3 +34,17 @@ Cross-modality images that combine visible-infrared spectra can provide compleme
 
 ![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/02a03c1b-e473-49e5-97b1-3dd2d312bc8f)
 
+# CITATION
+
+If you are interested this repo for your research, welcome to cite our paper:
+
+```
+@inproceedings{wang2023tirdet,
+  title={TIRDet: Mono-Modality Thermal InfraRed Object Detection Based on Prior Thermal-To-Visible Translation},
+  author={Wang, Zeyu and Colonnier, Fabien and Zheng, Jinghong and Acharya, Jyotibdha and Jiang, Wenyu and Huang, Kejie},
+  booktitle={Proceedings of the 31st ACM International Conference on Multimedia},
+  pages={2663--2672},
+  year={2023}
+}
+```
+
