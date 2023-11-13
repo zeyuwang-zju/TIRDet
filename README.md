@@ -34,7 +34,7 @@ Cross-modality images that combine visible-infrared spectra can provide compleme
 
 ![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/02a03c1b-e473-49e5-97b1-3dd2d312bc8f)
 
-# CITATION
+# Citation
 
 If you are interested this repo for your research, welcome to cite our paper:
 
