@@ -31,7 +31,13 @@ Cross-modality images that combine visible-infrared spectra can provide compleme
 6. Follow the implementations of **mmdetection** to train and test our model.
 
 # Pretrained Model Weights
-[TIRDet-S-FLIR](https://pan.baidu.com/s/1jWAOQuaTo_KI67Cywjj6Yg?pwd=2fgt). Code:2fgt
+We provide the pretrained mdoel weights on FLIR dataset:
+| Model | Code |
+| ------ | ------ |
+| [TIRDet-S](https://pan.baidu.com/s/1jWAOQuaTo_KI67Cywjj6Yg?pwd=2fgt) | 2fgt |
+| [TIRDet-M](https://pan.baidu.com/s/1xr7cKKhvO2RePFtf9SwhQA?pwd=6G3A) | 6G3A |
+| [TIRDet-L](https://pan.baidu.com/s/10ORSldZot8_1z2sytE8RLA?pwd=2fbT) | 2fbT |
+
 
 # Experiments
 
