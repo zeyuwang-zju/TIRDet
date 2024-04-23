@@ -63,7 +63,8 @@ class IMA(nn.Module):
         spatial_branch = self.spatialattention(F_cross) # (B, 1, h, w)
         out = f * channel_branch * spatial_branch + f
 
-        return out, self.conv1x1_z(z)
+        # return out, self.conv1x1_z(z)
+        return out
 
 
 
@@ -197,6 +198,10 @@ class YOLOXPAFPN_TIR(BaseModule):
 
         # top-down path
 
+        for i in range(len(self.in_channels)):
+            inputs[i] = self.ima_bottom_up[i](z, inputs[i]) 
+        inputs = tuple(inputs)
+
         inner_outs = [inputs[-1]]
         for idx in range(len(self.in_channels) - 1, 0, -1):
             feat_heigh = inner_outs[0]
@@ -210,6 +215,9 @@ class YOLOXPAFPN_TIR(BaseModule):
             inner_out = self.top_down_blocks[len(self.in_channels) - 1 - idx](
                 torch.cat([upsample_feat, feat_low], 1))
             inner_outs.insert(0, inner_out)
+
+        for i in range(len(self.in_channels)):
+            inner_outs[i] = self.ima_top_down[i](z, inner_outs[i])
 
         # bottom-up path
         outs = [inner_outs[0]]
