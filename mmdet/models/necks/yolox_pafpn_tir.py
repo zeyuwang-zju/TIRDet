@@ -67,7 +67,6 @@ class IMA(nn.Module):
         return out
 
 
-
 @NECKS.register_module()
 class YOLOXPAFPN_TIR(BaseModule):
     """Path Aggregation Network used in YOLOX.
