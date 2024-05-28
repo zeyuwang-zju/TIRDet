@@ -26,8 +26,8 @@ Cross-modality images that combine visible-infrared spectra can provide compleme
   LLVIP: https://bupt-ai-cz.github.io/LLVIP/
 2. Prepare the FLIR and LLVIP datasets into Microsoft COCO version.
 3. Use the provided **''mmdet''** and **''configs''**.
-5. Download the **Pearl-GAN** pretrained weights from https://github.com/FuyaLuo/PearlGAN/. Place them into **configs/tirdet/pearlgan_ckpt/FLIR_NTIR2DC/**.
-6. Follow the implementations of **mmdetection** to train and test our model.
+4. Download the **Pearl-GAN** pretrained weights from https://github.com/FuyaLuo/PearlGAN/. Place them into **configs/tirdet/pearlgan_ckpt/FLIR_NTIR2DC/**.
+5. Follow the implementations of **mmdetection** to train and test our model.
 
 # Pretrained Model Weights
 We provide the pretrained model weights on FLIR dataset:
