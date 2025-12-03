@@ -29,15 +29,6 @@ Cross-modality images that combine visible-infrared spectra can provide compleme
 4. Download the **Pearl-GAN** pretrained weights from https://github.com/FuyaLuo/PearlGAN/. Place them into **configs/tirdet/pearlgan_ckpt/FLIR_NTIR2DC/**.
 5. Follow the implementations of **mmdetection** to train and test our model.
 
-# Pretrained Model Weights
-We provide the pretrained model weights on FLIR dataset:
-| Model | Code |
-| ------ | ------ |
-| [TIRDet-S](https://pan.baidu.com/s/1jWAOQuaTo_KI67Cywjj6Yg?pwd=2fgt) | 2fgt |
-| [TIRDet-M](https://pan.baidu.com/s/1xr7cKKhvO2RePFtf9SwhQA?pwd=6G3A) | 6G3A |
-| [TIRDet-L](https://pan.baidu.com/s/10ORSldZot8_1z2sytE8RLA?pwd=2fbT) | 2fbT |
-
-
 # Experiments
 
 ![image](https://github.com/zeyuwang-zju/TIRDet/assets/112078495/02a03c1b-e473-49e5-97b1-3dd2d312bc8f)
@@ -55,4 +46,5 @@ If you are interested this repo for your research, welcome to cite our paper:
   year={2023}
 }
 ```
+
 
